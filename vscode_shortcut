@@ -1,0 +1,9 @@
+vscode shortcut
+ctrl + shift + e : 익스플로어 창 
+ctrl + k + e : 익스플로어창에서 현재 파일 찾기
+ctrl + shift + p : quick open navigation
+ctrl + ` : open terminal
+ctrl + shift + `  : open new terminal
+ctrl + shift + k : kill the terminal
+ctrl + shift + c + s : switch termial
+ctrl + k , s : save all files
