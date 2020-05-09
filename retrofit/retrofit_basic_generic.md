@@ -3,7 +3,7 @@
 
 ```
 // base url 은 '/' 로 끝나야함
-const val BASE_URL_OIL = "https://smart.oilbankcard.com:10443/mktapp/control/"
+const val BASE_URL_OIL = "https://github.com:10443/mktapp/control/"
 companion object {
     val retrofit = Retrofit.Builder().baseUrl(BASE_URL_OIL)
         .addConverterFactory(GsonConverterFactory.create())
