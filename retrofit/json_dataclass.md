@@ -10,7 +10,7 @@
     "MKNAME": "한기완",
     "EVTCPCNT": 0,
     "POGYON": "0",
-    "EVTCPURL": "http://devweb02a1.oilbank.co.kr:9080/m2012/login.do?RETURN_URL=%2Ffront%2FboardList.do%3Fpage_num%3D582%26pre_page_num%3D580%26bcode%3DMYPAGEEVENTCP"
+    "EVTCPURL": "http://~co.kr:9080/m2012/login.do?RETURN_URL=%2Ffront%2FboardList.do%3Fpage_num%3D582%26pre_page_num%3D580%26bcode%3DMYPAGEEVENTCP"
   },
   "RETCODE": "00",
   "APPSESSIDRS": "Y",
@@ -61,6 +61,7 @@
 
 <br>
 대응 되는 dataclass
+
 ```
 data class OilHisPointLucky004(
     var RETDATA: RETDATA004? = null,
