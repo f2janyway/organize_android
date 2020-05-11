@@ -11,6 +11,8 @@
         jvmTarget = "1.8"
     }
 
+    implementation "androidx.biometric:biometric:1.0.1"
+
 
     <!-- dagger -->
     implementation 'com.google.dagger:dagger-android:2.27'
