@@ -1,3 +1,21 @@
+2020-05-12
+=
+그냥 raw text 를 불러올때 json 이 아니다.
+```
+ val retrofit = Retrofit.Builder().baseUrl(BASE_URL)
+//            .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(ScalarsConverterFactory.create())
+
+
+
+```
+
+String을 받아올때
+gson 이용시 불편함
+<br>구현 안해봄
+[stackoverflow][https://link](https://stackoverflow.com/questions/39918814/use-jsonreader-setlenienttrue-to-accept-malformed-json-at-line-1-column-1-path)
+
+
 2020-05-08
 ===
 
