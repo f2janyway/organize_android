@@ -54,7 +54,7 @@ proguard-android-optimize.txt 해당 파일은 없음(찾아봐요)
         }
     }
 ```
-
+git
 progurad-rules.pro
 ```
 # Add project specific ProGuard rules here.
