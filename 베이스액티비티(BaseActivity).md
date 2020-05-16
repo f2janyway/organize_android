@@ -56,3 +56,59 @@ open class BaseActivity<DB:ViewDataBinding, VM:ViewModel> : AppCompatActivity() 
 }
 
 ```
+
+ㄴ
+2020-05-14
+=
+되는거
+
+```
+
+abstract class BaseActivity<DB : ViewDataBinding, VM : ViewModel> : AppCompatActivity() {
+
+    lateinit var binding: DB
+    lateinit var toolbar: androidx.appcompat.widget.Toolbar
+    lateinit var actionBar: ActionBar
+    val viewModel by lazy {
+        ViewModelProvider(getOwner()).get(insertViewModelClass())
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+//        binding = DataBindingUtil.setContentView(this, getLayoutId())
+    }
+
+    override fun setContentView(layoutResID: Int) {
+
+        val baseActivityLayout =
+            layoutInflater.inflate(R.layout.activity_base, null) as ConstraintLayout
+        val activityContainer = baseActivityLayout.findViewById<FrameLayout>(R.id.layout_container)
+
+        toolbar = baseActivityLayout.findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        actionBar = supportActionBar!!
+        actionBar.apply {
+            title = getString(R.string.default_toolbar)
+            setDisplayHomeAsUpEnabled(true)
+        }
+
+        binding = DataBindingUtil.inflate(layoutInflater,layoutResID,activityContainer,true)
+        super.setContentView(baseActivityLayout)
+    }
+
+    abstract fun getLayoutId(): Int
+    abstract fun getOwner(): ViewModelStoreOwner
+    fun showActionBar() {
+//        actionBar.title = where
+        toolbar.visibility = View.VISIBLE
+    }
+
+    fun hideActionBar() {
+        toolbar.visibility = View.GONE
+    }
+
+    abstract fun insertViewModelClass(): Class<VM>
+}
+
+```

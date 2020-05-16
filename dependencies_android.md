@@ -11,6 +11,8 @@
         jvmTarget = "1.8"
     }
 
+    implementation "androidx.biometric:biometric:1.0.1"
+
 
     <!-- dagger -->
     implementation 'com.google.dagger:dagger-android:2.27'
@@ -24,6 +26,7 @@
     <!-- retrofit -->
     implementation 'com.squareup.retrofit2:retrofit:2.7.1'
     implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'
 
     <!-- coroutines -->
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5"

@@ -7,3 +7,6 @@ ctrl + shift + `  : open new terminal
 ctrl + shift + k : kill the terminal
 ctrl + shift + c + s : switch termial
 ctrl + k , s : save all files
+
+
+ctrl + k v : mark down previews
