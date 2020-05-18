@@ -57,7 +57,7 @@ open class BaseActivity<DB:ViewDataBinding, VM:ViewModel> : AppCompatActivity() 
 
 ```
 
-ㄴ
+
 2020-05-14
 =
 되는거
