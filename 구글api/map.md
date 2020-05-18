@@ -1,5 +1,6 @@
-2020-05-08
+2020-05-16
 ===
+<<<<<<< HEAD
 ```
 package com.hyundaioilbank.android.map
 
@@ -53,11 +54,23 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
     GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     val code: String by lazy {
+=======
+MapActivity
+```
+
+class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+
+    val code: String by lazy {
+//        Log.e(TAG, ": ${intent.getStringExtra("stationCode")} < code")
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
         intent.getStringExtra("stationCode")
     }
 
     private lateinit var mMap: GoogleMap
+<<<<<<< HEAD
     //현재 위치 얻는
+=======
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var lastLocation: Location
 
@@ -67,6 +80,7 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
     private var locationUpdateState = false
     private val TAG = "Map"
 
+<<<<<<< HEAD
 
     var selectedMarker: Marker? = null
     var selectedMarkerItem: MarkerItem? = null
@@ -89,6 +103,21 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
          * @see [] https://www.raywenderlich.com/230-introduction-to-google-maps-api-for-android-with-kotlin#toc-anchor-005'
          */
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+=======
+    private val sheetBehavior by lazy {
+        BottomSheetBehavior.from(bottom_sheet_parent)
+    }
+    val bottomInitHeight : Int by lazy {
+        sheetBehavior.peekHeight
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_station_map)
+     
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
         sheetBehavior.apply {
             //options
             peekHeight = 350
@@ -99,6 +128,10 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
             Log.e(TAG, "onCreate: bottom init height : ${bottomInitHeight}")
         }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             val TAG = "BottomSheet Callback"
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -126,9 +159,17 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
                     }
                 }
             }
+<<<<<<< HEAD
         })
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment?
+=======
+
+        })
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as SupportMapFragment?
+
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
         mapFragment!!.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -137,6 +178,7 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
             override fun onLocationResult(p0: LocationResult?) {
                 super.onLocationResult(p0)
                 lastLocation = p0!!.lastLocation
+<<<<<<< HEAD
                 Log.e(TAG, "location >> $p0")
 //                placeMarkerOnMap(LatLng(lastLocation.latitude, lastLocation.longitude))
             }
@@ -145,6 +187,15 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
         createLocationRequest()
     }
 
+=======
+                placeMarkerOnMap(LatLng(lastLocation.latitude, lastLocation.longitude))
+            }
+        }
+        createLocationRequest()
+    }
+
+
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
     fun search() {
         val service = retrofit.build().create(ApiService::class.java)
         val callback = service.stationDetail(COILST = code)
@@ -183,7 +234,10 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
 //        }
     }
 
+<<<<<<< HEAD
 // 얘는 현재 위치를 계속 체크
+=======
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
     private fun createLocationRequest() {
         // 1
         locationRequest = LocationRequest()
@@ -203,6 +257,10 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
         // 5
         task.addOnSuccessListener {
             locationUpdateState = true
+<<<<<<< HEAD
+=======
+//            startLocationUpdates()
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
         }
         task.addOnFailureListener { e ->
             // 6
@@ -222,7 +280,11 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
             }
         }
     }
+<<<<<<< HEAD
 // 얘는 현재 위치를 계속 체크 얘두
+=======
+
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
     private fun startLocationUpdates() {
         //1
         if (ActivityCompat.checkSelfPermission(
@@ -263,7 +325,12 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE
             )
             return
+<<<<<<< HEAD
         }
+=======
+        } else
+            search()
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
 
     }
 
@@ -271,6 +338,7 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
     override fun onMapReady(map: GoogleMap?) {
         mMap = map!!
 
+<<<<<<< HEAD
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.setOnMarkerClickListener(this)
         setUpMap()
@@ -397,6 +465,36 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
         val canvas = Canvas(bitmap)
         view.draw(canvas)
         return bitmap
+=======
+        map.uiSettings.isZoomControlsEnabled = true
+        map.setOnMarkerClickListener(this)
+
+
+//        val lat = 37.554467
+//        val lng = 126.928441
+//        val sydney = LatLng(lat, lng)
+//        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
+        //zoom 0 - 20 or 13
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney,12.0f))
+
+
+        setUpMap()
+
+        map.isMyLocationEnabled = true
+//        map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+        // 2
+        fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
+            //3 Got last known location. In some rare situations this can be null.
+            if (location != null) {
+                lastLocation = location
+                val currentLatLng = LatLng(location.latitude, location.longitude)
+//                Log.e(TAG, "lat - ${currentLatLng.latitude} : long - ${currentLatLng.longitude}")
+                placeMarkerOnMap(currentLatLng)
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13f))
+            }
+        }
+
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
     }
 
     private fun getAddress(latLng: LatLng): String {
@@ -406,6 +504,11 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
         val addresses: List<Address>?
         val address: Address?
         var addressText = ""
+<<<<<<< HEAD
+=======
+
+        val addressT = StringBuilder()
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
         try {
             // 2
             addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
@@ -416,20 +519,56 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
                     addressText += if (i == 0) address.getAddressLine(i) else "\n" + address.getAddressLine(
                         i
                     )
+<<<<<<< HEAD
+=======
+
+//                    if (i == 0)
+//                        addressT.append(address.getAddressLine(i))
+//                    else
+//                        addressT.append("\n" + address.getAddressLine(i))
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
                 }
             }
         } catch (e: IOException) {
             Log.e("MapsActivity", e.localizedMessage)
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
         return addressText
     }
 
 
+<<<<<<< HEAD
+=======
+    private fun placeMarkerOnMap(location: LatLng) {
+        // 1
+        val markerOptions = MarkerOptions().position(location)
+        // 안되네...ㅠ
+//        markerOptions.icon(
+//            BitmapDescriptorFactory.fromBitmap(
+//                BitmapFactory.decodeResource(resources, R.mipmap.)
+//            )
+//        )
+        val titleString = getAddress(location)
+//        Log.e(TAG, "$titleString <<< titleString")
+        markerOptions.title(titleString)
+        // 2
+        mMap.addMarker(markerOptions)
+    }
+
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
     fun moveMap(it: StationDetail018) {
         val latLng = LatLng(
             it.RETMAP[0].NLATIT!!.toDouble(),
             it.RETMAP[0].NLOGIT!!.toDouble()
         )
+<<<<<<< HEAD
+=======
+//        Log.e(TAG, "moveMap: ${latLng}")
+//        Log.e(TAG, "${it.RETMAP[0]}")
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
         mMap.addMarker(
             MarkerOptions().position(
                 latLng
@@ -443,6 +582,7 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
     }
 
+<<<<<<< HEAD
     fun closeButton() {
         finish()
     }
@@ -488,4 +628,55 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
     }
 }
 
+=======
+    override fun onMarkerClick(p0: Marker?): Boolean {
+        return false
+    }
+
+}
+
+```
+
+activity_station_map.xml
+```
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".map.MapActivity">
+    <androidx.fragment.app.FragmentContainerView
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <include layout="@layout/map_bottom_sheet"
+        />
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+```
+map_bottom_sheet.xml
+```
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_sheet_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/corner"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        ...
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
+>>>>>>> 456e193b0131e093db2940a218de1fe54f91e3cd
 ```
