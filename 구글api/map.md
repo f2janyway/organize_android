@@ -502,3 +502,441 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerC
 }
 
 ```
+
+
+2020-05-21
+==
+대충 됨
+```
+package com.hyundaioilbank.android.map
+
+//import android.location.Geocoder
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.IntentSender
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
+import android.os.Build
+import android.os.Bundle
+import android.util.DisplayMetrics
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.*
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.maps.android.clustering.ClusterItem
+import com.google.maps.android.clustering.ClusterManager
+import com.google.maps.android.clustering.view.DefaultClusterRenderer
+import com.hyundaioilbank.android.BaseActivityNoViewModel
+import com.hyundaioilbank.android.R
+import com.hyundaioilbank.android.StationDetail018
+import com.hyundaioilbank.android.databinding.ActivityMapBinding
+import com.hyundaioilbank.android.findstation.FindStationActivity
+import com.hyundaioilbank.android.retrofit.ApiService
+import com.hyundaioilbank.android.retrofit.ApiService.Companion.retrofit
+import com.hyundaioilbank.android.retrofit.ApiService.Companion.retrofitCallback
+import kotlinx.android.synthetic.main.map_bottom_sheet.*
+import java.io.IOException
+import java.lang.Math.pow
+import kotlin.math.pow
+import kotlin.math.sqrt
+
+//https://gun0912.tistory.com/57  클릭시 색 변동 및 레이아웃 관련
+// have to viewmodel & clustering ( 잘 안됨 내가 짠 코드가 아니라 이해 필)
+class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCallback,
+    /*GoogleMap.OnMarkerClickListener,*/ /*GoogleMap.OnMapClickListener,*/
+    ClusterManager.OnClusterItemClickListener<MarkerItem> {
+
+    val code: String by lazy {
+        intent.getStringExtra("stationCode")
+    }
+
+    private lateinit var mMap: GoogleMap
+
+    //현재 위치 얻는
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var lastLocation: Location
+
+    private lateinit var locationCallback: LocationCallback
+
+    private lateinit var locationRequest: LocationRequest
+    private var locationUpdateState = false
+    private val TAG = "Map"
+
+
+    private val sheetBehavior by lazy {
+        BottomSheetBehavior.from(binding.includeMapBottomSheet.bottomSheetParent)
+    }
+    val bottomInitHeight: Int by lazy {
+        sheetBehavior.peekHeight
+    }
+
+    val clusterManager: MyClusterManager<MarkerItem> by lazy {
+        MyClusterManager<MarkerItem>(this, mMap)
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        super.setContentView(R.layout.activity_map)
+
+        binding.act = this
+        binding.includeMapBottomSheet.act = this
+        hideActionBar()
+        /**
+         * @see [] https://www.raywenderlich.com/230-introduction-to-google-maps-api-for-android-with-kotlin#toc-anchor-005'
+         */
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        sheetBehavior.apply {
+            //options
+            peekHeight = 350
+            isFitToContents = false
+            halfExpandedRatio = 0.5f
+            isHideable = false
+            setExpandedOffset(400)
+            Log.e(TAG, "onCreate: bottom init height : ${bottomInitHeight}")
+        }
+
+        sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            val TAG = "BottomSheet Callback"
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            }
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (newState) {
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        Log.e(TAG, "onStateChanged: hidden ")
+                    }
+                    BottomSheetBehavior.STATE_EXPANDED -> {
+                        Log.e(TAG, "onStateChanged: expanded")
+                    }
+                    BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                        Log.e(TAG, "onStateChanged: half expanded")
+                    }
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        Log.e(TAG, "onStateChanged: collapesd")
+                    }
+                    BottomSheetBehavior.STATE_DRAGGING -> {
+                        Log.e(TAG, "onStateChanged: dragging")
+                    }
+                    BottomSheetBehavior.STATE_SETTLING -> {
+                        Log.e(TAG, "onStateChanged: setting")
+                    }
+                }
+            }
+        })
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as SupportMapFragment?
+        mapFragment!!.getMapAsync(this)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(p0: LocationResult?) {
+                super.onLocationResult(p0)
+                lastLocation = p0!!.lastLocation
+                Log.e(TAG, "location >> $p0")
+//                placeMarkerOnMap(LatLng(lastLocation.latitude, lastLocation.longitude))
+            }
+        }
+    }
+
+    override fun onMapReady(map: GoogleMap?) {
+        mMap = map!!
+
+
+        mMap.uiSettings.isZoomControlsEnabled = true
+        setUpMap()
+        getSampleMarkerItem()
+        mMap.isMyLocationEnabled = true
+        mMap.uiSettings.isMyLocationButtonEnabled = false
+//        map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+        // 2
+        fusedLocationClient.lastLocation.addOnSuccessListener(this, onSuccessListener)
+
+        clusterManager.renderer = ClusterRenderer(this, mMap, clusterManager)
+//        clusterManager.setOnClusterItemClickListener(this)
+        mMap.setOnCameraIdleListener(clusterManager)
+        mMap.setOnMarkerClickListener(clusterManager)
+        clusterManager.cluster()
+
+    }
+
+    fun search() {
+        val service = retrofit.create(ApiService::class.java)
+        val callback = service.stationDetail(COILST = code)
+        val remain: (StationDetail018) -> Unit = {
+            if (it != null) {
+                moveMap(it)
+            }
+        }
+        retrofitCallback(call = callback, remains = remain)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CHECK_SETTINGS) {
+            if (resultCode == Activity.RESULT_OK) {
+                locationUpdateState = true
+                search()
+            }
+        } else
+            finish()
+    }
+
+    // 2
+    override fun onPause() {
+        super.onPause()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
+    //permission
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+        private const val REQUEST_CHECK_SETTINGS = 2
+    }
+
+    private fun setUpMap() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE
+            )
+            return
+        }
+    }
+
+    private val onSuccessListener: OnSuccessListener<Location> = OnSuccessListener {
+        if (it != null) {
+            lastLocation = it
+            val currentLatLng = LatLng(it.latitude, it.longitude)
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13f))
+        }
+    }
+
+    private fun calDistance(cLat: Double, cLon: Double, mLat: Double, mLon: Double): Double {
+        return sqrt((cLat - mLat).pow(2) + (cLon - mLon).pow(2))
+    }
+
+//    override fun onMarkerClick(marker: Marker?): Boolean {
+//        val center = CameraUpdateFactory.newLatLng(marker!!.position)
+//        mMap.moveCamera(center)
+//        return false
+//    }
+
+    val sampleList by lazy { ArrayList<MarkerItem>() }
+    val markerRootView by lazy { LayoutInflater.from(this).inflate(R.layout.marker_layout, null) }
+    val markerTextView by lazy<TextView> { markerRootView.findViewById(R.id.marker_textview) }
+    val markerImageView by lazy<ImageView> { markerRootView.findViewById(R.id.marker_category) }
+    private fun getSampleMarkerItem() {
+        sampleList.add(MarkerItem(37.5674320, 126.9216805, "5,000", false))
+        sampleList.add(MarkerItem(37.5570458, 126.9416835, "6,000", false))
+        sampleList.add(MarkerItem(37.5475456, 126.9216801, "1,000", false))
+        sampleList.add(MarkerItem(37.5555456, 126.9296801, "2,000", false))
+        sampleList.add(MarkerItem(37.5505456, 126.9326801, "3,000", false))
+
+        for (i in sampleList) {
+            clusterManager.addItems(sampleList)
+        }
+    }
+
+
+    private inner class ClusterRenderer(
+        context: Context,
+        mMap: GoogleMap,
+        clusterManager: ClusterManager<MarkerItem>
+    ) : DefaultClusterRenderer<MarkerItem>(context, mMap, clusterManager) {
+        var cnt = 0;
+        override fun onBeforeClusterItemRendered(item: MarkerItem?, markerOptions: MarkerOptions?) {
+
+            val centerItem = getCenterItem()
+            selectedMarkerItem = centerItem
+            Log.e(TAG, "${centerItem!!.position} < centeredItem-----")
+            Log.e(TAG, "$cnt < cnt")
+
+            if (item!!.position == centerItem.position) {
+                Log.e(TAG, "${item.position} < it true---------")
+                item.isSelected = true
+                markerOptions!!
+                    .position(item.position)
+                    .icon(getBitmapDescriptor(true))
+            } else {
+                Log.e(TAG, "${item.position} < it false--------")
+                item.isSelected = false
+                markerOptions!!
+                    .position(item.position)
+                    .icon(getBitmapDescriptor(false))
+            }
+            super.onBeforeClusterItemRendered(item, markerOptions)
+        }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun getBitmapDescriptor(isCentered: Boolean): BitmapDescriptor {
+
+        return if (isCentered) {
+            markerTextView.setTextColor(Color.RED)
+            markerImageView.setImageDrawable(getDrawable(android.R.drawable.arrow_down_float))
+            BitmapDescriptorFactory.fromBitmap(
+                createDrawableFromView(
+                    applicationContext,
+                    markerRootView
+                )
+            )
+        } else {
+            markerTextView.setTextColor(Color.BLACK)
+            markerImageView.setImageDrawable(getDrawable(android.R.drawable.arrow_down_float))
+            BitmapDescriptorFactory.fromBitmap(
+                createDrawableFromView(
+                    applicationContext,
+                    markerRootView
+                )
+            )
+        }
+    }
+
+    private fun getCenterItem(): MarkerItem? {
+        val center = mMap.cameraPosition.target
+        val min = sampleList.asSequence().minBy {
+            calDistance(
+                center.latitude,
+                center.longitude,
+                it.position.latitude,
+                it.position.longitude
+            )
+        }
+        return min
+    }
+
+
+    private fun createDrawableFromView(
+        context: Context, view:
+        View
+    ): Bitmap? {
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        view.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+        view.buildDrawingCache()
+        val bitmap: Bitmap = Bitmap.createBitmap(
+            view.measuredWidth,
+            view.measuredHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        view.draw(canvas)
+        return bitmap
+    }
+
+    fun moveMap(it: StationDetail018) {
+        val latLng = LatLng(
+            it.RETMAP[0].NLATIT!!.toDouble(),
+            it.RETMAP[0].NLOGIT!!.toDouble()
+        )
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng))
+//        val cameraPosition = CameraPosition.Builder()
+//            .target(latLng) // Center Set
+//            .zoom(15f) // Zoom
+//            .build()
+//        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+    }
+
+    //onClick 계속
+    fun closeButton() = finish()
+    fun searchMap() = startActivity(Intent(this, FindStationActivity::class.java))
+
+    private var selectedMarkerItem: MarkerItem? = null
+
+    // -1:left,  1:right
+    fun getcloseMarker(way: Int) {
+        val selectedLon = selectedMarkerItem!!.lon
+
+        val nextMarkerItem = when (way) {
+            -1 -> {
+                sampleList
+                    .filter { it.lon < selectedLon }
+                    .minBy { selectedLon - it.lon }
+            }
+            1 -> {
+                sampleList
+                    .filter { it.lon > selectedLon }
+                    .minBy { it.lon - selectedLon }
+            }
+            else -> {
+                // 처리 해야함
+                sampleList.filter {
+                    it.isSelected
+                }[0]
+            }
+        }
+        if (nextMarkerItem != null) {
+            val center =
+                CameraUpdateFactory.newLatLng(LatLng(nextMarkerItem.lat, nextMarkerItem.lon))
+            mMap.moveCamera(center)
+        }
+    }
+
+    fun moveToMyLocation() {
+        val ll = LatLng(lastLocation.latitude, lastLocation.longitude)
+        val my = CameraUpdateFactory.newLatLng(ll)
+        mMap.moveCamera(my)
+    }
+
+    override fun onClusterItemClick(p0: MarkerItem?): Boolean = true
+
+    inner class MyClusterManager<T : ClusterItem>(context: Context?, map: GoogleMap?) :
+        ClusterManager<T>(context, map) {
+        override fun onCameraIdle() {
+            super.onCameraIdle()
+            val min = getCenterItem()
+
+            val markers = clusterManager.markerCollection.markers
+            for (i in markers) {
+                if (i.position == min!!.position) {
+                    i.setIcon(getBitmapDescriptor(true))
+                } else {
+                    i.setIcon(getBitmapDescriptor(false))
+                }
+            }
+        }
+
+        override fun onMarkerClick(marker: Marker?): Boolean {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(marker!!.position))
+            return super.onMarkerClick(marker)
+        }
+    }
+
+
+}
+
+
+```
