@@ -53,9 +53,7 @@ class MapActivity : BaseActivityNoViewModel<ActivityMapBinding>(), OnMapReadyCal
     GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     val code: String by lazy {
-=======
 MapActivity
-```
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
