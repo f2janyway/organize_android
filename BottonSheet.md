@@ -95,7 +95,7 @@ sheetBehavior.apply {
    isFitToContents = false
    halfExpandedRatio = 0.3f
 
-}ㄴ
+}
 
 ...
 
@@ -138,3 +138,22 @@ sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCal
 })
 ```
 
+2020-06-11 
+=
+peakheight 정하는 법(특정 레이아웃 높이에 따라)
+```
+ sheetBehavior.apply {
+    val inner = binding.includeMapBottomSheet.bottomSheetInnerConst
+    inner.viewTreeObserver.addOnGlobalLayoutListener {
+       //children 의 높이에 따라 정하는데 정확히 기준 잘...
+       //부모 레이아웃(bottomSheetInnerConst) 이 만약 LinearLayout 
+       //이면 알기가 쉽다.
+       peekHeight = inner.getChildAt(4).top
+       //확인용
+       for(i in inner.children){
+           Log.e("MapActivity", "onCreate: children : $i")
+       }
+      }
+ }
+
+```
