@@ -157,3 +157,116 @@ peakheight 정하는 법(특정 레이아웃 높이에 따라)
  }
 
 ```
+
+2020-06-13 / sat
+=
+
+## 방식2
+fragment 이용
+
+```
+class AppInfoBottomSheetFragment : BottomSheetDialogFragment() {
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        //필요없음 fragmentDialog(super) 사용안하면 라운드 모양만들기 위해 필요
+       // dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        return inflater.inflate(R.layout.fragment_app_info_bottom_sheet, container, false)
+    }
+
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        val button = dialog?.findViewById<Button>(R.id.dialog_button)
+        val title = dialog?.findViewById<TextView>(R.id.dialog_title)
+        val contents = dialog?.findViewById<TextView>(R.id.dialog_contents)
+        if(requireArguments().getString(ARG_BOTTOM_SHEET_CATE) == "point"){
+            title ?.text= "포인트 적립/소멸 기준"
+            contents ?.text = requireActivity().getString(R.string.point_acc_expire)
+        }
+        button?.setOnClickListener {
+            dialog?.dismiss()
+        }
+    }
+    companion object{
+        fun newInstance(which: String): AppInfoBottomSheetFragment =
+            AppInfoBottomSheetFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_BOTTOM_SHEET_CATE, which)
+                }
+            }
+    }
+}
+```
+
+
+fragment_app_info_bottom_sheet.xml
+```
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:orientation="vertical"
+        android:padding="10dp"
+        tools:context=".bottomsheet.AppInfoBottomSheetFragment">
+
+        <!-- TODO: Update blank fragment layout -->
+
+        <TextView
+            android:id="@+id/dialog_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="앱 이용안내"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+
+            />
+
+        <TextView
+            android:id="@+id/dialog_contents"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="5dp"
+            android:text="@string/app_info"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/dialog_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/button_azure"
+            android:text="확인"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
+```
+
+라운드 모양을 위한 style작업 ; 다른 방법이 있는지는 잘 모름.
+```
+ <style name="AppBottomSheetDialogTheme"
+        parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalStyle</item>
+    </style>
+
+    <style name="AppModalStyle"
+        parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/corner</item>
+    </style>
+```
